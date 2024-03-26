@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airline Ticket Reservation System</title>
+<img src="A1.jpg">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            background-color: #f5f5f5;
+        }
+
+        #origin,
+        #destination,
+        #date {
+            width: 200px;
+            text-align: center;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        #confirmSeats {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #E9456E;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 8px;
+
+            background: rgba( 255, 255, 255, 0.2 );
+            box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+            backdrop-filter: blur( 3.5px );
+            -webkit-backdrop-filter: blur( 3.5px );
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        
+
+        li {
+            padding-top: 20px;
+        }
+
+        form label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        form input,
+        form button {
+            margin-bottom: 20px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        #seatMap {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .seat {
+            width: 40px;
+            height: 40px;
+            margin: 5px;
+            background-color: #eee;
+            border: 1px solid #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .seat.selected {
+            background-color: #E9456E;
+            color: #fff;
+        }
+
+        #confirmation {
+            text-align: center;
+            padding: 20px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Fly Away</h1>
+        <form id="searchForm">
+            <label for="origin">Origin:</label>
+            <input type="text" id="origin" required>
+            <label for="destination">Destination:</label>
+            <input type="text" id="destination" required>
+            <label for="date">Date:</label>
+            <input type="date" id="date" required>
+            <label for="passengers">Passengers:</label>
+            <input type="number" id="passengers" min="1" required>
+            <button type="submit">Search Flights</button>
+        </form>
+        <div id="flightsList" class="hidden">
+            <h2>Available Flights</h2>
+            <ul id="flights"></ul>
+        </div>
+        <div id="seatSelection" class="hidden">
+            <h2>Select Seats</h2>
+            <div id="seatMap"></div>
+            <button id="confirmSeats">Confirm Seats</button>
+        </div>
+        <div id="bookingDetails" class="hidden">
+            <h2>Booking Details</h2>
+            <form id="bookingForm">
+                <label for="fullName">Full Name:</label>
+                <input type="text" id="fullName" required>
+                <label for="email">Email:</label>
+                <input type="email" id="email" required>
+                <label for="cardNumber">Card Number:</label>
+                <input type="text" id="cardNumber" required>
+                <label for="expiry">Expiry Date:</label>
+                <input type="text" id="expiry" required>
+                <button type="submit">Book Now</button>
+            </form>
+        </div>
+        <div id="confirmation" class="hidden">
+            <h2>Booking Confirmation</h2>
+            <p>Your booking has been confirmed. Thank you!</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const searchForm = document.getElementById("searchForm");
+            const flightsList = document.getElementById("flightsList");
+            const seatSelection = document.getElementById("seatSelection");
+            const bookingDetails = document.getElementById("bookingDetails");
+            const confirmation = document.getElementById("confirmation");
+            const flights = [];
+
+            flights.push({ number: "ABC123", departure: "10:00 AM", arrival: "12:00 PM", price: 100 });
+            flights.push({ number: "XYZ456", departure: "2:00 PM", arrival: "4:00 PM", price: 120 });
+
+            searchForm.addEventListener("submit", function (event) {
+                event.preventDefault();
+                const origin = document.getElementById("origin").value;
+                const destination = document.getElementById("destination").value;
+                const date = document.getElementById("date").value;
+                const passengers = document.getElementById("passengers").value;
+                displayFlights(origin, destination, date, passengers);
+            });
+
+            function displayFlights(origin, destination, date, passengers) {
+                flightsList.innerHTML = "";
+                flights.forEach(flight => {
+                    const listItem = document.createElement("li");
+                    listItem.innerHTML = `<strong>${flight.number}</strong> | Departure: ${flight.departure} | Arrival: ${flight.arrival} | Price: $${flight.price}   `;
+                    const selectButton = document.createElement("button");
+                    selectButton.textContent = "Select";
+                    selectButton.addEventListener("click", function () {
+                        selectFlight(flight);
+                    });
+                    listItem.appendChild(selectButton);
+                    flightsList.appendChild(listItem);
+                });
+                flightsList.classList.remove("hidden");
+            }
+
+            function selectFlight(flight) {
+                flightsList.classList.add("hidden");
+                seatSelection.classList.remove("hidden");
+                const seatMap = document.getElementById("seatMap");
+                seatMap.innerHTML = "";
+                for (let i = 1; i <= 30; i++) {
+                    const seat = document.createElement("div");
+                    seat.textContent = i;
+                    seat.classList.add("seat");
+                    seat.addEventListener("click", function () {
+                        if (!seat.classList.contains("selected")) {
+                            seat.classList.add("selected");
+                        } else {
+                            seat.classList.remove("selected");
+                        }
+                    });
+                    seatMap.appendChild(seat);
+                }
+                const confirmSeatsButton = document.getElementById("confirmSeats");
+                confirmSeatsButton.addEventListener("click", function () {
+                    confirmSeats(flight);
+                });
+            }
+
+            function confirmSeats(flight) {
+                seatSelection.classList.add("hidden");
+                searchForm.classList.add("hidden");
+                bookingDetails.classList.remove("hidden");
+                const bookingForm = document.getElementById("bookingForm");
+                bookingForm.addEventListener("submit", function (event) {
+                    event.preventDefault();
+                    const fullName = document.getElementById("fullName").value;
+                    const email = document.getElementById("email").value;
+                    const cardNumber = document.getElementById("cardNumber").value;
+                    const expiry = document.getElementById("expiry").value;
+                    const totalFare = calculateTotalFare(flight);
+                    displayConfirmation(fullName, email, totalFare);
+                });
+            }
+
+            function calculateTotalFare(flight) {
+                const selectedSeats = document.querySelectorAll(".seat.selected").length;
+                return selectedSeats * flight.price;
+            }
+
+            function displayConfirmation(fullName, email, totalFare) {
+                bookingDetails.classList.add("hidden");
+                confirmation.innerHTML = `<p>Booking confirmed for ${fullName} (${email}). Total fare: $${totalFare}</p>`;
+                confirmation.classList.remove("hidden");
+            }
+        });
+    </script>
+</body>
+</html>
+
